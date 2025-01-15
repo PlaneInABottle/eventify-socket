@@ -41,8 +41,15 @@ const expressMiddleware = (req, res, next) => {
     const decoded = jwt.verify(token, jwtSecret);
 
     // Filter out iat, exp, and collection from decoded data
-    const { iat, exp, collection, ...userData } = decoded;
-    req.user = userData;
+    const {
+      iat,
+      exp,
+      user_role,
+      user_metadata: { display_name },
+      email,
+      sub,
+    } = decoded;
+    req.user = { display_name, email, sub, user_role };
 
     next();
   } catch (error) {
@@ -108,8 +115,10 @@ io.use((socket, next) => {
     // Remove 'Bearer ' if present
     const cleanToken = token.replace("Bearer ", "");
 
+    if (!process.env.JWT_SECRET) throw Error("JWT Secret not found");
     // Use the hashed secret for verification
     const jwtSecret = process.env.JWT_SECRET;
+
     const decoded = jwt.verify(cleanToken, jwtSecret);
 
     if (!decoded) {
@@ -117,8 +126,16 @@ io.use((socket, next) => {
     }
 
     // Filter out iat, exp, and collection from decoded data
-    const { iat, exp, collection, ...userData } = decoded;
-    socket.user = userData;
+    const {
+      iat,
+      exp,
+      collection,
+      user_role,
+      user_metadata: { display_name },
+      email,
+      sub,
+    } = decoded;
+    socket.user = { display_name, email, sub, user_role };
     next();
   } catch (error) {
     console.error("JWT Verification Error:", error);
@@ -137,7 +154,7 @@ io.on("connection", (socket) => {
       return;
     }
     socket.join(roomName);
-    console.log(`User ${socket.user.id} joined room: ${roomName}`);
+    console.log(`User ${socket.user.sub} joined room: ${roomName}`);
   });
 
   // Leave room with validation
@@ -147,7 +164,7 @@ io.on("connection", (socket) => {
       return;
     }
     socket.leave(roomName);
-    console.log(`User ${socket.user.id} left room: ${roomName}`);
+    console.log(`User ${socket.user.sub} left room: ${roomName}`);
   });
 
   // Handle sending messages to a room
