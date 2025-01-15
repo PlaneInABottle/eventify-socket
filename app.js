@@ -53,6 +53,7 @@ const expressMiddleware = (req, res, next) => {
 
     next();
   } catch (error) {
+    console.log(JSON.stringify(error));
     if (error instanceof jwt.TokenExpiredError) {
       return res.status(401).json({ error: "Token expired" });
     }
