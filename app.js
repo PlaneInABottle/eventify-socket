@@ -77,6 +77,7 @@ io.on("connection", (socket) => {
   });
 
   socket.on("send-message", ({ roomId, message }) => {
+    console.log("New message arrived to the socket: ", { roomId, message });
     io.to(roomId.toString()).emit("get-message", {
       message,
       sender: {
