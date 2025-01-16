@@ -87,6 +87,7 @@ io.on("connection", (socket) => {
         user_role: socket.user.user_role,
       },
       event_chat_id: message.event_chat_id,
+      created_at: message.created_at,
     });
   });
 
