@@ -76,16 +76,17 @@ io.on("connection", (socket) => {
     console.log(`User ${socket.user.sub} joined room: ${roomName}`);
   });
 
-  socket.on("send-message", ({ roomId, message }) => {
-    console.log("New message arrived to the socket: ", { roomId, message });
-    io.to(roomId.toString()).emit("get-message", {
-      message,
+  socket.on("send-message", (message) => {
+    console.log("New message arrived to the socket: ", message);
+    io.to(message.event_chat_id).emit("get-message", {
+      id: message.id,
+      content: message.content,
       sender: {
         id: socket.user.sub,
         display_name: socket.user.display_name,
         user_role: socket.user.user_role,
       },
-      roomId,
+      event_chat_id: message.event_chat_id,
     });
   });
 
