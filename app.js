@@ -10,7 +10,11 @@ const messageQueue = new Queue("socket-messages");
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server);
+const io = new Server(server, {
+  cors: {
+    origin: "*",
+  },
+});
 
 // Check for required environment variables
 if (!process.env.JWT_SECRET) {
